@@ -2,30 +2,42 @@ require 'sinatra'
 require 'sinatra/reloader'
 
 set :port, 9393
-set :secret_number, rand(100)
+@@secret_number = rand(100)
+@@guesses_left = 5
 
 def check_guess(guess)
-  if guess == 0
-    message = ''
-    color = 'white'
-  elsif settings.secret_number - guess < -5
-    message = 'Way too high!'
+  if @@guesses_left <= 0
+    message = "You lose! The number was #{@@secret_number}. A new number has now been generated."
     color = 'red'
-  elsif settings.secret_number - guess < 0
+    @@guesses_left = 5
+    @@secret_number
+  elsif guess == 0
+    message = ''
+    color = '#ece2d0'
+  elsif @@secret_number - guess < -5
+    message = 'Way too high!'
+    color = '#582c4d'
+    @@guesses_left -= 1
+  elsif @@secret_number - guess < 0
     message = 'Too high!'
     color = '#a26769'
-  elsif settings.secret_number - guess > 5
+    @@guesses_left -= 1
+  elsif @@secret_number - guess > 5
     message = 'Way too low!'
-    color = 'red'
-  elsif settings.secret_number - guess > 0
+    color = '#582c4d'
+    @@guesses_left -= 1
+  elsif @@secret_number - guess > 0
     message = 'Too low!'
     color = '#a26769'
-  elsif guess == settings.secret_number
-    message = "You got it! The number is #{settings.secret_number}"
-    color = 'green'
+    @@guesses_left -= 1
+  elsif guess == @@secret_number
+    message = "You got it! The number was #{@@secret_number}. A new number has now been generated."
+    color = '#56cbf9'
+    @@guesses_left = 5
+    @@secret_number = rand(100)
   else
     message = 'Nothing'
-    color = 'white'
+    color = '#ece2d0'
   end
   [message, color]
 end
@@ -33,5 +45,5 @@ end
 get '/' do
   guess = params['guess'].to_i
   message, color = check_guess(guess)
-  erb :index, locals: { message: message, color: color }
+  erb :index, locals: { message: message, color: color, guesses: @@guesses_left }
 end
