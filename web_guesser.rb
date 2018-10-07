@@ -45,5 +45,6 @@ end
 get '/' do
   guess = params['guess'].to_i
   message, color = check_guess(guess)
-  erb :index, locals: { message: message, color: color, guesses: @@guesses_left }
+  answer = params['cheat'] == 'true' ? @@secret_number : ''
+  erb :index, locals: { message: message, color: color, guesses: @@guesses_left, answer: answer }
 end
